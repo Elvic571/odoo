@@ -18,10 +18,10 @@ class StockPickingBatch(models.Model):
             line_ids = self.move_line_ids.filtered(lambda x: x.product_id == move_line.product_id and x.location_id == move_line.location_id)
             qty = 0
             for line in line_ids:
-                qty += line.product_uom_qty
+                qty += line.quantity_product_uom
             qty_done = 0
             for line in line_ids:
-                qty_done += line.qty_done
+                qty_done += line.quantity
             groups = self.grouped_transfer_ids.filtered(lambda x: x.product_id == move_line.product_id and x.location_id == move_line.location_id)
             # if move_line.product_id.id not in product_ids or move_line.location_id.id not in location_ids:
             if not groups:
