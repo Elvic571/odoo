@@ -11,7 +11,7 @@
     'data': [
         'views/mrp_workorders_views.xml',
         'views/mrp_production_views.xml',
-        # 'view/template_inheritance_view.xml'
+        'views/product_view.xml.xml'
      
     ],
     'license': 'LGPL-3',

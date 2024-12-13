@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+      <record id="product_template_form_view_inherit" model="ir.ui.view">
+            <field name="name">product.varient.form.view.form.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="delivery_goflow.product_template_form_view_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='asin_var']" position="after">
+                        <field name="win_var"/>
+                </xpath>
+            </field>
+        </record>
+</odoo>
