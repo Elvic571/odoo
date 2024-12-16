@@ -284,7 +284,7 @@ class SaleOrder(models.Model):
                                     except Exception as e:
                                         picking.note = str(e)
 
-                            if not self.invoice_ids:
+                            if not self.invoice_ids and not self.partner_id.no_goflow_invoicing:
                                 self._create_invoices()
                             if self.invoice_ids:
                                 for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
@@ -294,7 +294,7 @@ class SaleOrder(models.Model):
                                 self.goflow_full_invoiced = True
                                 # print("Invoiced")
 
-                if not self.invoice_ids:
+                if not self.invoice_ids and not self.partner_id.no_goflow_invoicing:
                     self._create_invoices()
                 if self.invoice_ids:
                     unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
