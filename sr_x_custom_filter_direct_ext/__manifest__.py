@@ -11,6 +11,8 @@
     'data': [
         'views/mrp_workorders_views.xml',
         'views/mrp_production_views.xml',
+        'views/invoice_report.xml',
+        'views/partner_view.xml',
      
     ],
     'license': 'LGPL-3',
