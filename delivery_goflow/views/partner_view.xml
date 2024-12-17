@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+                <xpath expr="//field[@name='property_account_payable_id']" position="after">
+                    <field name="no_goflow_invoicing" help="Prevents invoice generation on goflow fulfillment sync"/>
+                </xpath>
+        </field>
+    </record>
+</odoo>
