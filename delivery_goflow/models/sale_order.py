@@ -348,7 +348,7 @@ class SaleOrder(models.Model):
                         
                         picking.write({'note': note})
 
-            if not self.invoice_ids and not self.partner_id.no_goflow_invoicing::
+            if not self.invoice_ids and not self.partner_id.no_goflow_invoicing:
                 self._create_invoices()
             if self.invoice_ids:
                 unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
