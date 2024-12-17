@@ -19,6 +19,7 @@
         "views/stock_picking_batch.xml",
         "views/stock_picking_type.xml",
         "wizard/goflow_order_search.xml",
+        "views/partner_view.xml"
 
     ],
     'auto_install': True,
