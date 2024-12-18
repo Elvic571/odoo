@@ -16,6 +16,25 @@ class work_order(models.Model):
     #                 attribute_names.append(attribute.name)
     #         rec.attribute_values = ', '.join(attribute_names)
 
+    def action_open_label_type(self):
+        # Map finished move lines from the work order
+        move_line_ids = self.production_id.move_finished_ids.mapped('move_line_ids')
+
+        # Check if the user belongs to the required group and lots exist
+        if self.user_has_groups('stock.group_production_lot') and move_line_ids.lot_id:
+            view = self.env.ref('stock.picking_label_type_form')
+            return {
+                'name': _('Choose Type of Labels To Print'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'picking.label.type',
+                'views': [(view.id, 'form')],
+                'target': 'new',
+                'context': {'default_production_ids': self.production_id.ids},
+            }
+
+        # Fallback to the label layout action
+        return self.production_id.action_open_label_layout()
+
     @api.depends('product_id')
     def _compute_attribute_values(self):
         for rec in self:
