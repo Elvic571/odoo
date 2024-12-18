@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, api, fields
+from odoo import models, api
 
 
 class Partner(models.Model):
     _inherit = 'res.partner'
-
-    no_goflow_invoicing = fields.Boolean('No GoFlow Invoicing')
 
     def _get_name(self):
         partner = self
