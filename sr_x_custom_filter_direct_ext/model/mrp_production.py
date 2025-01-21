@@ -19,3 +19,9 @@ class mrp_production(models.Model):
                     list2.append(attribute.name)
             list_main = list_ + list2
             rec.attribute_values = ', '.join(list_main)
+
+    # a temporary patch to fix the issue described here https://github.com/odoo/odoo/pull/194325
+    def write(self, vals):
+        if 'date_start' in vals:
+            vals['date_start'] = fields.Datetime.to_datetime(vals['date_start'])
+        return super(mrp_production, self).write(vals)
