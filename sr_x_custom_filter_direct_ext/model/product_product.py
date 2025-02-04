@@ -12,7 +12,7 @@ class ProductProduct(models.Model):
 
     @api.constrains('goflow_id_var')
     def _goflow_id_var(self):
-        if self.goflow_id_var != False:
+        if self.goflow_id_var:
             result = self.env['product.product'].search([('goflow_id_var', '=', self.goflow_id_var),('id', '!=', self.id)], limit=1)
             if result:
                 match_rec = self.env['product.product'].search([('goflow_id_var', '=', self.goflow_id_var)], limit=1)
@@ -20,7 +20,7 @@ class ProductProduct(models.Model):
 
     @api.constrains('goflow_item_no_var')
     def _goflow_item_no_var(self):
-        if self.goflow_id_var != False:
+        if self.goflow_item_no_var:
             result = self.env['product.product'].search([('goflow_item_no_var', '=', self.goflow_item_no_var),('id', '!=', self.id)], limit=1)
             if result:
                 match_rec = self.env['product.product'].search([('goflow_item_no_var', '=', self.goflow_item_no_var)], limit=1)
@@ -28,7 +28,7 @@ class ProductProduct(models.Model):
 
     @api.constrains('asin_var')
     def _asin_var(self):
-        if self.goflow_id_var != False:
+        if self.asin_var:
             result = self.env['product.product'].search([('asin_var', '=', self.asin_var),('id', '!=', self.id)], limit=1)
             if result:
                 match_rec = self.env['product.product'].search([('asin_var', '=', self.asin_var)], limit=1)
