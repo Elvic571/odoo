@@ -201,7 +201,7 @@ class SaleOrder(models.Model):
                 # print(i)
                 # print(order.name)
                 order.create_invoice_delivery()
-            in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
+            in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status in ['in_picking','in_packing','ready_to_ship','shipped'])
             if in_picking_orders:
                 self._create_batch_transfers(in_picking_orders)
         else:
@@ -232,7 +232,7 @@ class SaleOrder(models.Model):
         for sync_index in sync_indexes:
             order_ids = sync_index.order_ids
             if order_ids:
-                in_picking_orders = order_ids.filtered(lambda o: o.goflow_order_status == 'in_picking')
+                in_picking_orders = order_ids.filtered(lambda o: o.goflow_order_status in ['in_picking','in_packing','ready_to_ship','shipped'])
                 if in_picking_orders:
                     self._create_batch_transfers(in_picking_orders)
             sync_index.synced_transfers = True
