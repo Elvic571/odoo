@@ -5,26 +5,49 @@ class ProductProduct(models.Model):
     _inherit = "product.product"
 
     def write(self, vals):
-        # Update the record and capture changes
-        message = self._post_changes_in_chatter(self, vals)
-        res = super(ProductProduct, self).write(vals)
-        # Post a message to the chatter about the changes
-        if self.id and  message:
-            message = Markup('<ul>%s</ul>') % (message)
-            self.message_post(body=message)
-        return res
+        for rec in self:
+            # Update the record and capture changes
+            # message = self._post_changes_in_chatter(self, vals)
+            old_values = {}
+            for field, new_value in vals.items():
+                if field not in old_values:
+                    old_values[field] = None
+                old_values[field] = getattr(rec, field)
 
-    def _post_changes_in_chatter(self, record, vals=None):
+            res = super(ProductProduct, rec).write(vals)
+
+            message = rec._post_changes_in_chatter(old_values, rec, vals)
+            # Post a message to the chatter about the changes
+            if rec.id and message:
+                message = Markup('<ul>%s</ul>') % (message)
+                rec.message_post(body=message)
+            return res
+
+    def _post_changes_in_chatter(self, record, latest_rec, vals=None):
         """
         Post a message in the chatter when fields are created or updated.
         """
-        messages = []
-        fields_metadata = self.fields_get()
-        # Track changes to fields during updates
-        for field, new_value in vals.items():
-            old_value = getattr(record, field)
-            if old_value != new_value:
-                messages.append("{}: {} => {}".format(fields_metadata[field]['string'], old_value, new_value))
+        for rec in self:
+            messages = []
+            fields_metadata = rec.fields_get()
+            # Track changes to fields during updates
+            for field, new_value in vals.items():
+                old_value = record[field]
+                if isinstance(old_value, models.Model):
+                    if isinstance(new_value, list):
+                        if sorted([rec.id for rec in old_value]) != sorted([rec[1] for rec in new_value]):
+                            messages.append(
+                                "{}: {} => {}".format(fields_metadata[field]['string'], [rec.name for rec in old_value],
+                                                      [tag.name for rec in latest_rec for tag in rec.product_tag_ids]))
+                            continue
+                    else:
+                        if [rec.id for rec in old_value] != [new_value]:
+                            messages.append(
+                                "{}: {} => {}".format(fields_metadata[field]['string'], [rec.name for rec in old_value],
+                                                      [tag.name for rec in latest_rec for tag in rec.categ_id]))
+                            continue
+                if old_value != new_value:
+                    messages.append("{}: {} => {}".format(fields_metadata[field]['string'], old_value, new_value))
 
-        message = Markup().join(Markup('<li>%s</li>') % description for description in messages)
-        return message
+            message = Markup().join(Markup('<li>%s</li>') % description for description in messages)
+            return message
