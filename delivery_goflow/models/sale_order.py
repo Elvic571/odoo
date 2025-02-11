@@ -370,8 +370,8 @@ class SaleOrder(models.Model):
 
     # create invoice delivery and reservation policy server action
     def create_invoice_delivery_server_action(self):
-        self.create_invoice_delivery()
-        return True
+        for rec in self:
+            rec.create_invoice_delivery()
         # goflow_order_status = self.goflow_order_status or ''
         # order_state = self.state
         #
