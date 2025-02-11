@@ -270,7 +270,8 @@ class SaleOrder(models.Model):
                                             erased_pack = str(move_line.result_package_id.name)
                                             move_line.write({'result_package_id': False})
                                             note += f"Destanation Pack {erased_pack} erased. "
-                                            
+
+                            picking._autoconfirm_picking()
                             picking.button_validate()
                             note += f"Was fully reserved: Validation successful. "
                             
@@ -292,7 +293,8 @@ class SaleOrder(models.Model):
                                                 erased_pack = str(move_line.result_package_id.name)
                                                 move_line.write({'result_package_id': False})
                                                 note += f"Destanation Pack {erased_pack} erased. "
-                                                
+
+                                picking._autoconfirm_picking()
                                 picking.button_validate()
                                 note += f"After Cycling Reservation: Validation successful. "
                                 
@@ -314,8 +316,9 @@ class SaleOrder(models.Model):
                                         if move_line.result_package_id:
                                             erased_pack = str(move_line.result_package_id.name)
                                             move_line.write({'result_package_id': False})
-                                            note += f"Destanation Pack {erased_pack} erased. "    
-                            
+                                            note += f"Destanation Pack {erased_pack} erased. "
+
+                            picking._autoconfirm_picking()
                             picking.button_validate()
                             note += f"After quantities were forced: Validation successful"
                             
@@ -340,6 +343,7 @@ class SaleOrder(models.Model):
                                             note += f"Destanation Pack {erased_pack} erased. " 
                                             
                             try:
+                                picking._autoconfirm_picking()
                                 picking.button_validate()
                                 note += f"After Cycling Reservation and forcing quantities: Validation successful"
                             
@@ -366,84 +370,86 @@ class SaleOrder(models.Model):
 
     # create invoice delivery and reservation policy server action
     def create_invoice_delivery_server_action(self):
-        goflow_order_status = self.goflow_order_status or ''
-        order_state = self.state
-
-        if goflow_order_status == 'in_picking':
-            if order_state == 'draft':
-                self.action_confirm()
-            if self.picking_ids:
-                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-                    if picking.state in ('waiting', 'confirmed'):
-                        picking.action_assign()
-
-        if goflow_order_status == 'shipped':
-            if order_state == 'draft':
-                self.action_confirm()
-
-            if self.picking_ids:
-                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-                    if picking.state in ('waiting', 'confirmed', 'assigned'):
-                        try:
-                            picking.action_assign()
-                        except Exception as e:
-                            picking.note = e
-
-                    if picking.state != 'done':
-                        try:
-                            if picking.picking_type_id.code == 'outgoing':
-                                picking.button_validate()
-                        except Exception as e:
-                            picking.note = str(e)
-
-                            for move in picking.move_ids:
-                                move.quantity = 0
-
-                            picking.action_assign()
-                            try:
-                                picking.button_validate()
-                            except Exception as e:
-                                picking.note += f"\n{str(e)}"
-
-                                if picking.state == 'confirmed':
-                                    try:
-                                        for move in picking.move_ids:
-                                            if move.quantity != move.product_uom_qty:
-                                                move.quantity = move.product_uom_qty
-                                                if picking.state == 'assigned':
-                                                    try:
-                                                        picking.action_assign()
-                                                        picking.button_validate()
-                                                    except Exception as e:
-                                                        picking.note = e
-
-                                    except Exception as e:
-                                        picking.note = str(e)
-
-                            if not self.invoice_ids:
-                                self._create_invoices()
-                            if self.invoice_ids:
-                                for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
-                                    ## copy goflow invoice no to invoice in odoo
-                                    invoice.goflow_invoice_no = self.goflow_invoice_no
-                                    invoice.action_post()
-                                self.goflow_full_invoiced = True
-                                # print("Invoiced")
-
-                if not self.invoice_ids:
-                    self._create_invoices()
-                if self.invoice_ids:
-                    unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
-                    if unmarked_invoices and self.goflow_invoice_no:
-                        for unmarked_invoice in unmarked_invoices:
-                            unmarked_invoice.goflow_invoice_no = self.goflow_invoice_no
-
-                    for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
-                        ## copy goflow invoice no to invoice in odoo
-                        invoice.goflow_invoice_no = self.goflow_invoice_no
-                        invoice.action_post()
-
-                    self.goflow_full_invoiced = True
+        for rec in self:
+            rec.create_invoice_delivery()
+        # goflow_order_status = self.goflow_order_status or ''
+        # order_state = self.state
+        #
+        # if goflow_order_status == 'in_picking':
+        #     if order_state == 'draft':
+        #         self.action_confirm()
+        #     if self.picking_ids:
+        #         for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
+        #             if picking.state in ('waiting', 'confirmed'):
+        #                 picking.action_assign()
+        #
+        # if goflow_order_status == 'shipped':
+        #     if order_state == 'draft':
+        #         self.action_confirm()
+        #
+        #     if self.picking_ids:
+        #         for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
+        #             if picking.state in ('waiting', 'confirmed', 'assigned'):
+        #                 try:
+        #                     picking.action_assign()
+        #                 except Exception as e:
+        #                     picking.note = e
+        #
+        #             if picking.state != 'done':
+        #                 try:
+        #                     if picking.picking_type_id.code == 'outgoing':
+        #                         picking.button_validate()
+        #                 except Exception as e:
+        #                     picking.note = str(e)
+        #
+        #                     for move in picking.move_ids:
+        #                         move.quantity = 0
+        #
+        #                     picking.action_assign()
+        #                     try:
+        #                         picking.button_validate()
+        #                     except Exception as e:
+        #                         picking.note += f"\n{str(e)}"
+        #
+        #                         if picking.state == 'confirmed':
+        #                             try:
+        #                                 for move in picking.move_ids:
+        #                                     if move.quantity != move.product_uom_qty:
+        #                                         move.quantity = move.product_uom_qty
+        #                                         if picking.state == 'assigned':
+        #                                             try:
+        #                                                 picking.action_assign()
+        #                                                 picking.button_validate()
+        #                                             except Exception as e:
+        #                                                 picking.note = e
+        #
+        #                             except Exception as e:
+        #                                 picking.note = str(e)
+        #
+        #                     if not self.invoice_ids:
+        #                         self._create_invoices()
+        #                     if self.invoice_ids:
+        #                         for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+        #                             ## copy goflow invoice no to invoice in odoo
+        #                             invoice.goflow_invoice_no = self.goflow_invoice_no
+        #                             invoice.action_post()
+        #                         self.goflow_full_invoiced = True
+        #                         # print("Invoiced")
+        #
+        #         if not self.invoice_ids:
+        #             self._create_invoices()
+        #         if self.invoice_ids:
+        #             unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
+        #             if unmarked_invoices and self.goflow_invoice_no:
+        #                 for unmarked_invoice in unmarked_invoices:
+        #                     unmarked_invoice.goflow_invoice_no = self.goflow_invoice_no
+        #
+        #             for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+        #                 ## copy goflow invoice no to invoice in odoo
+        #                 invoice.goflow_invoice_no = self.goflow_invoice_no
+        #                 invoice.action_post()
+        #
+        #             self.goflow_full_invoiced = True
                     # print("Invoiced")
 
     def _prepare_batch_values(self):
