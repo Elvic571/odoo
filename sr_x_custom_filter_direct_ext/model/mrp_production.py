@@ -56,7 +56,14 @@ class mrp_production(models.Model):
         )
 
         # ✅ Filter out pickings that are already in "done" state
-        filtered_documents = {key: value for key, value in documents.items() if key[0].state != 'done'}
+        # filtered_documents = {key: value for key, value in documents.items() if key[0].state != 'done'}
+
+        # updated version of the filter
+        current_user = self.env.user
+        filtered_documents = {
+            key: value for key, value in documents.items()
+            if key[0].state != 'done' and key[1] != current_user  # key[1] is the responsible_id
+        }
 
         # Log activity only for pickings that are NOT done
         self.env['stock.picking']._log_activity(_render_note_exception_quantity_mo, filtered_documents)
