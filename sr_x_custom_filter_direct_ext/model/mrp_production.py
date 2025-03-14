@@ -1,5 +1,27 @@
 from odoo import models, fields, api
 
+class MrpReport(models.Model):
+    _inherit = "mrp.report"
+
+    product_tmpl_id = fields.Many2one("product.template", string="Product Template")
+
+    def _select(self):
+        select_str = super()._select()
+        select_str += ", pp.product_tmpl_id AS product_tmpl_id"
+        return select_str
+
+    def _from(self):
+        from_str = super()._from()
+        from_str += """
+            LEFT JOIN product_product pp ON pp.id = mo.product_id
+            LEFT JOIN product_template pt ON pp.product_tmpl_id = pt.id
+        """
+        return from_str
+
+    def _group_by(self):
+        group_by_str = super()._group_by()
+        group_by_str += ", pp.product_tmpl_id"
+        return group_by_str
 
 class mrp_production(models.Model):
     _inherit = 'mrp.production'
