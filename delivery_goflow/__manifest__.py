@@ -4,7 +4,7 @@
     'description': "Send your orders and shippings through Goflow and track them online",
     'category': 'Inventory/Delivery',
     'version':'1.0',
-    'depends': ['sale', 'mail', 'delivery', 'stock_picking_batch', 'stock'],
+    'depends': ['sale', 'mail', 'delivery', 'stock_picking_batch', 'stock', 'purchase_stock'],
     'data':[
         'security/ir.model.access.csv',
         "data/api_call_data.xml",
@@ -18,6 +18,8 @@
         "views/invoice_view.xml",
         "views/stock_picking_batch.xml",
         "views/stock_picking_type.xml",
+        "wizard/goflow_order_search.xml",
+        "views/partner_view.xml"
 
     ],
     'auto_install': True,

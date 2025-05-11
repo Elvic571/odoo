@@ -90,20 +90,62 @@ class ResConfigSettings(models.TransientModel):
         related='company_id.printnode_fit_to_page',
     )
 
+    printnode_account_id = fields.Many2one(
+        comodel_name='printnode.account',
+        default=lambda self: self.get_main_printnode_account()
+    )
+
     dpc_api_key = fields.Char(
-        string='API Key',
-        default='',
+        string='DPC API Key',
+        related='printnode_account_id.api_key',
+        readonly=False,
     )
 
     dpc_status = fields.Char(
         string='Direct Print Client API Key Status',
-        readonly=True,
+        related='printnode_account_id.status',
     )
 
     dpc_is_allowed_to_collect_data = fields.Boolean(
         string="Allow to collect stats",
-        default=True,
+        related='printnode_account_id.is_allowed_to_collect_data',
+        readonly=False,
     )
+
+    dpc_is_scales_debug_enabled = fields.Boolean(
+        string="Enable scales debug",
+        related='printnode_account_id.is_scales_debug_enabled',
+        readonly=True,
+    )
+
+    debug_logging = fields.Boolean(
+        readonly=False,
+        related='company_id.debug_logging',
+    )
+
+    log_type_ids = fields.Many2many(
+        comodel_name='printnode.log.type',
+        readonly=False,
+        related='company_id.log_type_ids',
+    )
+
+    printing_scenarios_from_crons = fields.Boolean(
+        readonly=False,
+        related='company_id.printing_scenarios_from_crons',
+    )
+
+    secure_printing = fields.Boolean(
+        readonly=False,
+        related='company_id.secure_printing',
+    )
+
+    @api.onchange('debug_logging', 'log_type_ids')
+    def _check_debug_logging(self):
+        if not self.debug_logging:
+            self.log_type_ids = [(5, 0, 0)]
+        elif not self.log_type_ids:
+            log_types = self.env[self.log_type_ids._name].search([('active', '=', True)])
+            self.log_type_ids = [(4, log_type.id) for log_type in log_types]
 
     @api.onchange('print_package_with_label', 'print_sl_from_attachment')
     def _onchange_print_package_with_label(self):
@@ -131,50 +173,84 @@ class ResConfigSettings(models.TransientModel):
                 }
             }
 
-    def get_values(self):
-        res = super(ResConfigSettings, self).get_values()
-
-        accounts = self.env['printnode.account'].search([]).sorted(key=lambda r: r.id)
-
-        if accounts:
-            # First account is main account. All other accounts - not allowed anymore
-            # (but will still work for better customer experience)
-            account = accounts[0]
-
-            res.update(
-                dpc_api_key=account.api_key,
-                dpc_status=account.status,
-                dpc_is_allowed_to_collect_data=account.is_allowed_to_collect_data,
-            )
-
-        return res
-
     def set_values(self):
         if self.print_package_with_label and not self.group_stock_tracking_lot:
             self.group_stock_tracking_lot = True
 
-        if self.dpc_api_key:
-            self.env['printnode.account'].update_main_account(
-                self.dpc_api_key,
-                self.dpc_is_allowed_to_collect_data)
-
         super(ResConfigSettings, self).set_values()
+
+    # Buttons
+
+    # TODO: Perhaps this concept should be reconsidered, because there can be two or more
+    #  accounts. In this case, actions like ('activate_account', 'import_devices',
+    #  'clear_devices_from_odoo', ...) must be performed not for the main account with
+    #  index [0], but for the account that is selected in the "dpc_api_key" field!
+    def get_main_printnode_account(self):
+        return self.env['printnode.account'].get_main_printnode_account()
 
     def activate_account(self):
         """
         Callback for activate button. Finds and activates the main account
         """
-        accounts = self.env['printnode.account'].search([]).sorted(key=lambda r: r.id)
+        account = self.get_main_printnode_account()
 
-        if accounts:
-            return accounts[0].activate_account()
-        else:
-            raise exceptions.UserError(_('Please, add an account before activation'))
+        if not account:
+            raise exceptions.UserError(_('Please add an account before activation'))
+
+        return account.activate_account()
 
     def import_devices(self):
-        accounts = self.env['printnode.account'].search([]).sorted(key=lambda r: r.id)
+        """ Import Printers & Scales button in Settings.
+        """
+        account = self.get_main_printnode_account()
 
-        if accounts:
-            return accounts[0].import_devices()
-        else:
+        if not account:
             raise exceptions.UserError(_('Please, add an account before importing printers'))
+
+        return account.import_devices()
+
+    def clear_devices_from_odoo(self):
+        """ Callback for "Clear Devices from Odoo" button.
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(_('Please add an account before clearing devices'))
+
+        return account.clear_devices_from_odoo()
+
+    def enable_scales_debug_mode(self):
+        """
+        Create a test scale with computer
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(
+                _('Please add an account before enabling test scales integration'))
+
+        return account.enable_scales_debug_mode()
+
+    def disable_scales_debug_mode(self):
+        """
+        Delete test scale with computer
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(
+                _('Please add an account before disabling test scales integration'))
+
+        return account.disable_scales_debug_mode()
+
+    def generate_debug_scales_measurement(self):
+        """
+        Generate a test measurement for the test scale
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(
+                _('Please add an account before generating a test measurement'))
+
+        return account.generate_debug_scales_measurement()

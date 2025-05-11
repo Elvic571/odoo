@@ -45,7 +45,16 @@ class ProductProduct(models.Model):
                     goflow_tags.append(tag['id'])
                 if len(allowed_tags) == len(total_tags):
                     if not check_if_product_exists:
-                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no,})
+                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no,
+                                     'detailed_type': 'product'})
                 elif not set(allowed_tags.mapped('goflow_id')).isdisjoint(goflow_tags):
                     if not check_if_product_exists:
-                        self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no,})
+                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no,
+                                     'detailed_type': 'product'})
+
+class ProductProductVaraint(models.Model):
+    _inherit = 'product.product'
+
+    goflow_id_var = fields.Char('Goflow ID')
+    goflow_item_no_var = fields.Char('Goflow Item Number')
+    asin_var = fields.Char("ASIN")

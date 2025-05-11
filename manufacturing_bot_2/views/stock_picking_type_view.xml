@@ -1,0 +1,12 @@
+<odoo>
+    <record id="stock_picking_id_form_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.id.form.inherit</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.view_picking_type_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='create_backorder']" position="after">
+                <field name="activate_manufacturing_bot" invisible="code != 'mrp_operation'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

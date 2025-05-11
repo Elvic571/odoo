@@ -6,7 +6,7 @@
         <field name="priority" eval ="46"/>
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='base_geolocalize']" position="after">
+            <xpath expr="//setting[@id='base_geolocalize']" position="after">
                 <div class="col-12 col-lg-6 o_setting_box" id="token_goflow_view">
                     <div class="o_setting_right_pane">
                         <span class ="o_form_label">Goflow</span>
@@ -28,6 +28,16 @@
                                     Get API token
                                 </a>
                             </div>
+
+                            <br/>
+                             <label for="last_inpicking_sync" string="Last in_picking Sync"/>
+                            <field name ="last_inpicking_sync"/>
+                            <br/>
+                             <label for="last_shipped_sync" string="Last shipped Sync"/>
+                            <field name ="last_shipped_sync"/>
+                            <br/>
+                             <label for="last_readytopick_sync" string="Last ready_to_pick Sync"/>
+                            <field name ="last_readytopick_sync"/>
                         </div>
                     </div>
                 </div>

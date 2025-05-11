@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_invoice_template_filter">
+        <t t-call="web.html_container">
+            <div class="page">
+                <t t-foreach="docs" t-as="doc">
+
+                    <t t-if="doc['total'] and doc['total'] > 0">
+
+                        <t t-set="total_as_int" t-value="int(doc['total'])"/>
+                        <div class='col' style="text-align:center;font-size:35px">
+                        <t t-set='count' t-value='0'/>
+                            <t t-foreach="range(total_as_int)" t-as="i">
+                            <t t-set='count' t-value='count + 1'/>
+                                <b>
+                                <t t-esc="doc['width']"/>
+                                x
+                                <t t-esc="doc['length']"/>
+                                x
+                                    <t t-esc="doc['height']"/></b>
+                                <t t-if='count != total_as_int'>
+                                    <p style="page-break-after: always;"/>
+                                </t>
+
+                            </t>
+                        </div>
+                    </t>
+
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

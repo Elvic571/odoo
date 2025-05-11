@@ -1,0 +1,35 @@
+<odoo>
+    <record id="mrp_production_workorder_tree_view_inherit" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.tree.inherit</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_tree_editable_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="attribute_values"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_view_form_inherit_workorder" model="ir.ui.view">
+        <field name="name">mrp.workorder.view.form.inherit.workorder</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='workcenter_id']" position="after">
+                <field name="Product_internal_reference"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_form_inherit_button" model="ir.ui.view">
+        <field name="name">mrp.workorder.view.form.inherit.label.button</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_open_mes']" position="after">
+                <button string="Print Labels" name="action_open_label_type" type="object" class="oe_highlight"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
