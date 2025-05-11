@@ -86,8 +86,8 @@ class PacksizeApiService(models.AbstractModel):
         # ------------------
         job_data = [{
             "Title": mo_number,
-            "Length": str(length),
             "Width": str(width),
+            "Length": str(length),
             "Height": str(height),
             "Quantity": str(quantity),
             "Operator": str(operator),
