@@ -59,7 +59,7 @@ class PacksizeApiService(models.AbstractModel):
         # Configurations
         # ------------------
 
-        packsize_ip = "YOUR_PACKSIZE_MACHINE_IP"
+        packsize_ip = "23.244.22.74:3530"
         username = "YOUR_USERNAME"
         password = "YOUR_PASSWORD"
         client_id = "Default client_id"
